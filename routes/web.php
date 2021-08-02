@@ -24,3 +24,19 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+/**
+ * Profile
+ */
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->middleware('auth');
+Route::get('/profile/{userId}/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->middleware('auth');
+Route::get('/profile/{userId}/update', [App\Http\Controllers\ProfileController::class, 'update'])->middleware('auth');
+Route::post('/profile/{userId}/addPhoto', [App\Http\Controllers\ProfileController::class, 'addPhoto'])->middleware('auth');
+Route::post('/profile/{userId}/myPhotos', [App\Http\Controllers\ProfileController::class, 'myPhotos'])->middleware('auth');
+
+/**
+ * Photos
+ */
+Route::get('/photos', [\App\Http\Controllers\PhotoController::class, 'index']);
+Route::get('/photos/{photoId}/download', [\App\Http\Controllers\PhotoController::class, 'downloadPhoto']);
+Route::get('/photos/{photoId}/bookmark', [\App\Http\Controllers\PhotoController::class, 'bookmarkPhoto']);

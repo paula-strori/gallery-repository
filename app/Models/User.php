@@ -18,8 +18,12 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'surname',
         'email',
         'password',
+        'phone',
+        'address',
+        'gender'
     ];
 
     /**
@@ -40,4 +44,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function userPhotos()
+    {
+        return $this->hasMany(Photo::class);
+    }
+
+    public function bookmarkedPhotos()
+    {
+        return $this->belongsToMany(Photo::class, 'user_bookmarks', 'user_id', 'photo_id');
+    }
 }
