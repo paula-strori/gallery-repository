@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Auth::routes();
@@ -33,6 +33,7 @@ Route::get('/profile/{userId}/edit', [App\Http\Controllers\ProfileController::cl
 Route::get('/profile/{userId}/update', [App\Http\Controllers\ProfileController::class, 'update'])->middleware('auth');
 Route::post('/profile/{userId}/addPhoto', [App\Http\Controllers\ProfileController::class, 'addPhoto'])->middleware('auth');
 Route::post('/profile/{userId}/myPhotos', [App\Http\Controllers\ProfileController::class, 'myPhotos'])->middleware('auth');
+Route::post('/profile/{userId}/myBookmarkedPhotos', [App\Http\Controllers\ProfileController::class, 'myBookmarkedPhotos'])->middleware('auth');
 
 /**
  * Photos

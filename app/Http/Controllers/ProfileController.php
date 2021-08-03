@@ -55,7 +55,7 @@ class ProfileController extends Controller
 
     public function addPhoto(Request $request, $userId)
     {
-        $categoryName = PhotoCategory::findOrFail($request->category_id)->name;
+        $categoryName = PhotoCategory::findOrFail($request->photo_category_id)->name;
         if ( $request->hasFile('img')){
             $path = storage_path('app/'.$categoryName);
             $image = $request->img;
@@ -84,8 +84,21 @@ class ProfileController extends Controller
             $myPhotos->where('photo_category_id', $request->photo_category_id);
         }
         $myPhotos->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('users.myPhotos', compact('myPhotos'));
+    }
+
+    public function myBookmarkedPhotos(Request $request, $userId)
+    {
+        $bookmarks = Photo::has('userBookmarks')->where('user_id', $userId);
+
+        if ($request->has('photo_category_id')) {
+            $bookmarks->where('photo_category_id', $request->photo_category_id);
+        }
+        $bookmarks->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('users.bookmarkedPhotos', compact('bookmarks'));
     }
 }

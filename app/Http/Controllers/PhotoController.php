@@ -12,13 +12,13 @@ class PhotoController extends Controller
 {
     public function index(Request $request)
     {
-        $photos = Photo::with('userBookmarks', 'category')->all();
+        $photos = Photo::with('userBookmarks', 'category');
 
         if ($request->has('photo_category_id')) {
             $photos->where('photo_category_id', $request->photo_category_id);
         }
         $photos->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('photos.index', compact('photos'));
     }
