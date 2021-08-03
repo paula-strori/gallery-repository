@@ -16,14 +16,6 @@ class Photo extends Model
         'category_id'
     ];
 
-     const CATEGORIES = [
-         '1' => 'Personal',
-         '2' => 'Family',
-         '3' => 'Nature',
-         '4' => 'Architecture',
-         '5' => 'Other'
-     ];
-
      public function users()
      {
          return $this->belongsTo(User::class);
@@ -32,5 +24,10 @@ class Photo extends Model
      public function userBookmarks()
      {
          return $this->belongsToMany(User::class, 'user_bookmarks', 'photo_id', 'user_id');
+     }
+
+     public function category()
+     {
+         return $this->belongsTo(PhotoCategory::class);
      }
 }

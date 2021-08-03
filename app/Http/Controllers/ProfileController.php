@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Photo;
+use App\Models\PhotoCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -54,7 +55,7 @@ class ProfileController extends Controller
 
     public function addPhoto(Request $request, $userId)
     {
-        $categoryName = Photo::CATEGORIES[$request->category_id];
+        $categoryName = PhotoCategory::findOrFail($request->category_id)->name;
         if ( $request->hasFile('img')){
             $path = storage_path('app/'.$categoryName);
             $image = $request->img;
@@ -66,7 +67,7 @@ class ProfileController extends Controller
                 'user_id' => $userId,
                 'name' => $filename,
                 'url_path' => $path,
-                'category_id' => $request->category_id
+                'photo_category_id' => $request->photo_category_id
             ]);
 
             return back()
@@ -77,10 +78,10 @@ class ProfileController extends Controller
 
     public function myPhotos(Request $request, $userId)
     {
-        $myPhotos = Photo::with('userBookmarks')->where('user_id', $userId);
+        $myPhotos = Photo::with('userBookmarks', 'category')->where('user_id', $userId);
 
-        if ($request->has('category_id')) {
-            $myPhotos->where('category_id', $request->category_id);
+        if ($request->has('photo_category_id')) {
+            $myPhotos->where('photo_category_id', $request->photo_category_id);
         }
         $myPhotos->orderBy('created_at', 'desc')
             ->get();

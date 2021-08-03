@@ -18,10 +18,10 @@ class CreateUserBookmarksTable extends Migration
             $table->unsignedInteger('photo_id');
         });
 
-        Schema::table('user_bookmarks', function($table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('photo_id')->references ('id')->on('photos')->onDelete('cascade');
-        });
+//        Schema::table('user_bookmarks', function($table) {
+//            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+//            $table->foreign('photo_id')->references ('id')->on('photos')->onDelete('cascade');
+//        });
     }
 
     /**

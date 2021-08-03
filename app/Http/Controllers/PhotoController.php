@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Photo;
+use App\Models\PhotoCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use File;
@@ -11,10 +12,10 @@ class PhotoController extends Controller
 {
     public function index(Request $request)
     {
-        $photos = Photo::with('userBookmarks')->all();
+        $photos = Photo::with('userBookmarks', 'category')->all();
 
-        if ($request->has('category_id')) {
-            $photos->where('category_id', $request->categoryId);
+        if ($request->has('photo_category_id')) {
+            $photos->where('photo_category_id', $request->photo_category_id);
         }
         $photos->orderBy('created_at', 'desc')
             ->get();
@@ -25,8 +26,8 @@ class PhotoController extends Controller
     public function downloadPhoto($photoId)
     {
         $photo = Photo::findOrFail($photoId);
-        $category = Photo::CATEGORIES[$photo->categoryId];
-        $filePath = 'app/'.$category.'/'.$photo->name;
+        $categoryName = PhotoCategory::findOrFail($photo->photo_category_id)->name;
+        $filePath = 'app/'.$categoryName.'/'.$photo->name;
 
         if (! File::exists(storage_path($filePath))) {
             return abort('404', 'Photo not found!');
