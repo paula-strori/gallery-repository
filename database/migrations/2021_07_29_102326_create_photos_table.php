@@ -22,9 +22,9 @@ class CreatePhotosTable extends Migration
             $table->timestamps();
         });
 
-//        Schema::table('photos', function($table) {
-//            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-//        });
+        Schema::table('photos', function($table) {
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+        });
     }
 
     /**
