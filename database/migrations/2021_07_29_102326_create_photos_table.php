@@ -15,15 +15,13 @@ class CreatePhotosTable extends Migration
     {
         Schema::create('photos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('url_path');
-            $table->unsignedInteger('photo_category_id');
+            $table->unsignedBigInteger('photo_category_id');
             $table->timestamps();
-        });
-
-        Schema::table('photos', function($table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('photo_category_id')->references('id')->on('photo_categories');
         });
     }
 

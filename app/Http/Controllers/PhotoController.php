@@ -12,24 +12,49 @@ class PhotoController extends Controller
 {
     public function index(Request $request)
     {
-        $photos = Photo::with('user','userBookmarks', 'category');
-
-        if ($request->has('photo_category_id')) {
-            $photos->where('photo_category_id', $request->photo_category_id);
+        $photoCategories = PhotoCategory::all();
+        $photos = Photo::with('user', 'category');
+        if ($request->has('category')) {
+            $photos->where('photo_category_id', $request->category);
+            $filterCategory = $request->category;
+        } else {
+            $filterCategory = false;
         }
-        $photos->orderBy('created_at', 'desc')
+        if ($request->has('bookmarked')) {
+            $photos->whereHas('userBookmarks', function ($q) {
+                $q->where('user_id', auth()->id());
+            });
+            $filterBookmarked = "all";
+        } else {
+            $filterBookmarked = "onlyBookmarked";
+        }
+        $photos = $photos->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('photos.index', compact('photos'));
+        $bookmarks = Photo::whereHas('userBookmarks', function ($q) {
+            $q->where('user_id', auth()->id());
+        })->pluck('id')->toArray();
+
+        if ($bookmarks) {
+            foreach ($photos as $photo) {
+                if (in_array($photo->id, $bookmarks)) {
+                    $photo['bookmarked'] = true;
+                } else {
+                    $photo['bookmarked'] = false;
+                }
+            }
+        }
+
+        return view('photos.index', compact('photos', 'photoCategories', 'filterCategory', 'filterBookmarked'));
     }
 
     public function downloadPhoto($photoId)
     {
         $photo = Photo::findOrFail($photoId);
         $categoryName = PhotoCategory::findOrFail($photo->photo_category_id)->name;
-        $filePath = 'app/'.$categoryName.'/'.$photo->name;
+        $filePath = public_path('images/' . $categoryName . '/' . $photo->name);
 
-        if (! File::exists(storage_path($filePath))) {
+        if (!File::exists($filePath)) {
             return abort('404', 'Photo not found!');
         }
 
@@ -39,8 +64,13 @@ class PhotoController extends Controller
     public function bookmarkPhoto($photoId)
     {
         $user = User::findOrFail(auth()->id());
-        $user->bookmarkedPhotos()->attach($photoId);
-
-        return response()->json('Photo was bookmarked!');
+        $isBookmarked = $user->bookmarkedPhotos()->where('photo_id', $photoId)->exists();
+        if ($isBookmarked) {
+            $user->bookmarkedPhotos()->detach($photoId);
+            return response()->json('Removed');
+        } else {
+            $user->bookmarkedPhotos()->attach($photoId);
+            return response()->json('Bookmarked');
+        }
     }
 }

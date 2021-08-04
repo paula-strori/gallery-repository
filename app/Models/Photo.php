@@ -13,21 +13,21 @@ class Photo extends Model
         'user_id',
         'name',
         'url_path',
-        'category_id'
+        'photo_category_id'
     ];
 
-     public function user()
-     {
-         return $this->belongsTo(User::class);
-     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
-     public function userBookmarks()
-     {
-         return $this->belongsToMany(User::class, 'user_bookmarks', 'photo_id', 'user_id');
-     }
+    public function userBookmarks()
+    {
+        return $this->belongsToMany(User::class, 'user_bookmarks', 'photo_id', 'user_id');
+    }
 
-     public function category()
-     {
-         return $this->belongsTo(PhotoCategory::class);
-     }
+    public function category()
+    {
+        return $this->belongsTo(PhotoCategory::class, 'photo_category_id', 'id');
+    }
 }

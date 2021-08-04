@@ -14,13 +14,11 @@ class CreateUserBookmarksTable extends Migration
     public function up()
     {
         Schema::create('user_bookmarks', function (Blueprint $table) {
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('photo_id');
-        });
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('photo_id');
 
-        Schema::table('user_bookmarks', function($table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('photo_id')->references ('id')->on('photos')->onDelete('cascade');
+            $table->foreign('photo_id')->references('id')->on('photos')->onDelete('cascade');
         });
     }
 

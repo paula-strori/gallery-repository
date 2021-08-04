@@ -12,15 +12,27 @@ class ProfileController extends Controller
     public function show($userId)
     {
         $userProfile = User::findOrFail($userId);
+        $userPhotos = Photo::with('category')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+        $photoCategories = PhotoCategory::all();
 
-        return view('users.show', compact('userProfile'));
-    }
+        $bookmarks = Photo::whereHas('userBookmarks', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->pluck('id')->toArray();
 
-    public function edit($userId)
-    {
-        $userProfile = User::findOrFail($userId);
+        if ($bookmarks) {
+            foreach ($userPhotos as $photo) {
+                if (in_array($photo->id, $bookmarks)) {
+                    $photo['bookmarked'] = true;
+                } else {
+                    $photo['bookmarked'] = false;
+                }
+            }
+        }
 
-        return view('users.edit', compact('userProfile'));
+        return view('users.show', compact('userProfile', 'userPhotos', 'photoCategories'));
     }
 
     public function update(Request $request, $userId)
@@ -50,23 +62,23 @@ class ProfileController extends Controller
 
         $userProfile->update($request->all());
 
-        return back()->with('success', 'User Profile was updated successfully!');
+        return back()->with(['message' => 'User Profile was updated successfully!']);
     }
 
     public function addPhoto(Request $request, $userId)
     {
-        $categoryName = PhotoCategory::findOrFail($request->photo_category_id)->name;
-        if ( $request->hasFile('img')){
-            $path = storage_path('app/'.$categoryName);
+        if ($request->hasFile('img')) {
+            $categoryName = PhotoCategory::findOrFail($request->photo_category_id)->name;
+            $path = public_path('images/' . $categoryName);
             $image = $request->img;
             $extension = $image->getClientOriginalExtension();
-            $filename = strtolower($image->getClientOriginalName()).'.'.$extension;
-            $image->move($path,$filename);
+            $filename = strtolower(preg_replace('/[^A-Za-z0-9_\-]/', "-", $image->getClientOriginalName())) . '.' . $extension;
+            $image->move($path, $filename);
 
             $photo = Photo::create([
                 'user_id' => $userId,
                 'name' => $filename,
-                'url_path' => $path,
+                'url_path' => env('APP_URL') . '/images/' . $categoryName . '/' . $filename,
                 'photo_category_id' => $request->photo_category_id
             ]);
 
@@ -74,31 +86,5 @@ class ProfileController extends Controller
                 ->with('success', 'Photo was uploaded successfully!')
                 ->with('photo', $photo);
         }
-    }
-
-    public function myPhotos(Request $request, $userId)
-    {
-        $myPhotos = Photo::with('userBookmarks', 'category')->where('user_id', $userId);
-
-        if ($request->has('photo_category_id')) {
-            $myPhotos->where('photo_category_id', $request->photo_category_id);
-        }
-        $myPhotos->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return view('users.myPhotos', compact('myPhotos'));
-    }
-
-    public function myBookmarkedPhotos(Request $request, $userId)
-    {
-        $bookmarks = Photo::has('userBookmarks')->where('user_id', $userId);
-
-        if ($request->has('photo_category_id')) {
-            $bookmarks->where('photo_category_id', $request->photo_category_id);
-        }
-        $bookmarks->orderBy('created_at', 'desc')
-            ->paginate(15);
-
-        return view('users.bookmarkedPhotos', compact('bookmarks'));
     }
 }
